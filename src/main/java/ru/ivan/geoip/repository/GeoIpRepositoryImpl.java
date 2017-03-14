@@ -5,10 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.record.*;
-import com.maxmind.geoip2.record.Location;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import ru.ivan.geoip.repository.entity.*;
+import ru.ivan.geoip.repository.entity.IPLocation;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -16,13 +15,14 @@ import java.net.InetAddress;
 @Controller
 @Qualifier(value = "repository")
 public class GeoIpRepositoryImpl implements GeoIPRepository {
+
     private final String DATABASE_CITY_PATH = System.getenv("GEOIP_DB_FILE");
 
     public GeoIpRepositoryImpl() {
     }
 
     @Override
-    public String getLocation(String ip)  {
+    public IPLocation getLocation(String ip) {
         try {
             File dbCityFile = new File(DATABASE_CITY_PATH);
             DatabaseReader cityReader = new DatabaseReader.Builder(dbCityFile).build();
@@ -30,7 +30,7 @@ public class GeoIpRepositoryImpl implements GeoIPRepository {
 
             CityResponse cityResponse = cityReader.city(ipAddress);
 
-            IPLocation ipLocation=new IPLocation();
+            IPLocation ipLocation = new IPLocation();
 
             Country country = cityResponse.getCountry();
             ipLocation.setCountryCode(country.getIsoCode());
@@ -50,19 +50,25 @@ public class GeoIpRepositoryImpl implements GeoIPRepository {
             ipLocation.setLatitude(String.valueOf(location.getLatitude()));
             ipLocation.setLongitude(String.valueOf(location.getLongitude()));
 
-            String jLocation = "";
-            try {
-                jLocation = new ObjectMapper().writeValueAsString(
-                        ipLocation);
 
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-
-
-            return  jLocation;
-        } catch (Exception e){
-            return "";
+            return ipLocation;
+        } catch (Exception e) {
+            return null;
         }
+    }
+
+
+    @Override
+    public String getLocationAsJSON(String ip) {
+        IPLocation ipLocation = getLocation(ip);
+        String jLocation = "";
+        try {
+            jLocation = new ObjectMapper().writeValueAsString(
+                    ipLocation);
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return jLocation;
     }
 }

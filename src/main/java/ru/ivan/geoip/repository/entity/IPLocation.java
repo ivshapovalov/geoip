@@ -2,14 +2,14 @@ package ru.ivan.geoip.repository.entity;
 
 public class IPLocation {
 
-    private String countryCode;
-    private String countryName;
-    private String region;
-    private String regionName;
-    private String city;
-    private String postalCode;
-    private String latitude;
-    private String longitude;
+    private String countryCode="";
+    private String countryName="";
+    private String region="";
+    private String regionName="";
+    private String city="";
+    private String postalCode="";
+    private String latitude="";
+    private String longitude="";
 
     @Override
     public String toString() {

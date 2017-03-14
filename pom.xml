@@ -18,6 +18,25 @@
         <hamcrest.version>1.3</hamcrest.version>
     </properties>
     <dependencies>
+
+        <!--UI -->
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>jquery</artifactId>
+            <version>1.12.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>3.3.7</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.webjars</groupId>
+                    <artifactId>jquery</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
         <!--XML -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
