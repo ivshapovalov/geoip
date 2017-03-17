@@ -7,68 +7,55 @@ import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.record.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
-import ru.ivan.geoip.repository.entity.IPLocation;
+import ru.ivan.geoip.repository.entity.IpPosition;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.net.InetAddress;
+
+import static ru.ivan.geoip.util.Constants.GEOIP_DB_FILE;
 
 @Controller
 @Qualifier(value = "repository")
 public class GeoIpRepositoryImpl implements GeoIPRepository {
 
-    private final String DATABASE_CITY_PATH = System.getenv("GEOIP_DB_FILE");
-
     public GeoIpRepositoryImpl() {
     }
 
     @Override
-    public IPLocation getLocation(String ip) {
+    public IpPosition getPosition(String ip) {
         try {
-            File dbCityFile = new File(DATABASE_CITY_PATH);
+            File dbCityFile = new File(GEOIP_DB_FILE);
             DatabaseReader cityReader = new DatabaseReader.Builder(dbCityFile).build();
             InetAddress ipAddress = InetAddress.getByName(ip);
 
             CityResponse cityResponse = cityReader.city(ipAddress);
 
-            IPLocation ipLocation = new IPLocation();
+            IpPosition ipPosition = new IpPosition(ip);
 
             Country country = cityResponse.getCountry();
-            ipLocation.setCountryCode(country.getIsoCode());
-            ipLocation.setCountryName(country.getName());
+            ipPosition.setCountryCode(country.getIsoCode());
+            ipPosition.setCountryName(country.getName());
 
             Subdivision subdivision = cityResponse.getMostSpecificSubdivision();
-            ipLocation.setRegionName(subdivision.getName());
-            ipLocation.setRegion(subdivision.getIsoCode());
+            ipPosition.setRegionName(subdivision.getName());
+            ipPosition.setRegion(subdivision.getIsoCode());
 
             City city = cityResponse.getCity();
-            ipLocation.setCity(city.getName());
+            ipPosition.setCity(city.getName());
 
             Postal postal = cityResponse.getPostal();
-            ipLocation.setPostalCode(postal.getCode());
+            ipPosition.setPostalCode(postal.getCode());
 
             Location location = cityResponse.getLocation();
-            ipLocation.setLatitude(String.valueOf(location.getLatitude()));
-            ipLocation.setLongitude(String.valueOf(location.getLongitude()));
+            ipPosition.setLatitude(String.valueOf(location.getLatitude()));
+            ipPosition.setLongitude(String.valueOf(location.getLongitude()));
 
-
-            return ipLocation;
+            return ipPosition;
         } catch (Exception e) {
             return null;
         }
     }
 
 
-    @Override
-    public String getLocationAsJSON(String ip) {
-        IPLocation ipLocation = getLocation(ip);
-        String jLocation = "";
-        try {
-            jLocation = new ObjectMapper().writeValueAsString(
-                    ipLocation);
-
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return jLocation;
-    }
 }

@@ -19,34 +19,78 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
         integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
         crossorigin="anonymous"></script>
-<style type="text/css">
-    .header {
-        padding: 15px;
-        text-align: center;
-        color: white;
-        font-size: 40px;
-        min-height: 100px;
-        background: #dbdfe5;
-        margin-bottom: 10px;
-
-        background: red;
-        background: -webkit-linear-gradient(steelblue, gray);
-        background: -ms-linear-gradient(darkgray, yellow);
-        background: linear-gradient(steelblue, gray);
-    }
-</style>
+<body>
 <title>Check IP</title>
+<script src="https://api-maps.yandex.ru/2.1/?lang=en_US" type="text/javascript"></script>
+<script type="text/javascript">    ymaps.ready(function () {
+        var myMap = new ymaps.Map('map_clusters', {
+            center: [0, 0],
+            zoom: 1,
+            controls: ['zoomControl', 'typeSelector'],
+            behaviors: ['default', 'scrollZoom']
+        });
+        clusterer = new ymaps.Clusterer({
+            preset: 'islands#invertedVioletClusterIcons',
+            groupByCoordinates: false,
+            clusterDisableClickZoom: true,
+            clusterHideIconOnBalloonOpen: false,
+            geoObjectHideIconOnBalloonOpen: false
+        }),
+            getPointData = function (position) {
+                return {
+                    balloonContentHeader: 'IP ' + (position.ip + 1),
+                    balloonContentBody: getContentBody(position)
 
-<%--<body onload="document.form.ip.focus();">--%>
+                }
+
+            },
+            getPointOptions = function () {
+                return {
+                    preset: 'islands#violetIcon'
+                };
+            },
+            points = ${points},
+            geoObjects = [];
+
+        function getContentBody(position) {
+            var str='';
+            for (key in position) {
+                if (position.hasOwnProperty(key)) {
+                    var value = position[key];
+                    str = str + key + ':' + value + '</br>'
+                }
+            }
+            return str;
+        }
+
+        var jpositions =${jpositions};
+
+        for (var i = 0, len = points.length; i < len; i++) {
+            geoObjects[i] = new ymaps.Placemark(points[i],
+                getPointData(jpositions[i]),
+                getPointOptions());
+        }
+        clusterer.options.set({
+            gridSize: 50,
+            clusterDisableClickZoom: true
+        });
+
+        clusterer.add(geoObjects);
+        myMap.geoObjects.add(clusterer);
+
+
+        myMap.setBounds(clusterer.getBounds(), {
+            checkZoomRange: true
+        });
+    }
+)
+;
+</script>
 
 <div class="container" style="alignment: center">
-    <div class="row">
-        <div class="col-xs-12">
-            <div class="header">Check IP</div>
-        </div>
-    </div>    <form:form name="form" action="" method="post">
+    <form:form name="form" action="" method="post">
         <br>
-        <div >
+        <div>
             <div class="row" style="text-align: center">
                 <div class="form-group">
                     <div class="col-xs-12">
@@ -60,9 +104,9 @@
                 </div>
             </div>
             <br>
-            <div class="row" >
-                <div class="form-group" >
-                    <div class="col-xs-12" >
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-xs-12">
                             <textarea style="text-align: center"
                                       class="form-control"
                                       path="ip"
@@ -76,14 +120,18 @@
                 </div>
             </div>
             <br>
+            <c:choose>
+                <c:when test="${positions!=null && positions.size()!=0}">
+                    <div id="map_clusters" style="width: 100%; height: 100%;"></div>
+                </c:when>
+            </c:choose>
+            <br>
             <div class="row" style="text-align: center">
                 <c:choose>
                     <c:when test="${ip!=null}">
                         <div class="form-group">
-                            <div class="col-xs-12">
-                                <h2>
-                                        ${ip}
-                                </h2>
+                            <div class="col-xs-12" style="font-size: small">
+                                    ${ip}
                             </div>
                         </div>
                     </c:when>
@@ -92,23 +140,49 @@
             <br>
             <div class="row" style="text-align: center">
                 <c:choose>
-                    <c:when test="${location==null}">
+                    <c:when test="${positions!=null && positions.size()!=0}">
                         <div class="form-group">
-                            <div class="col-xs-12">
-                                <h2>
-                                    <c:choose>
-                                        <c:when test="${ip!=null}">
-                                            Location not found!
-                                        </c:when>
-                                    </c:choose>
-                                </h2>
+                            <div class="col-xs-12" style="font-size: small">
+                                <table class="table" border="1">
+                                    <tr>
+                                        <td><b>IP</b></td>
+                                        <td><b>Country code</b></td>
+                                        <td><b>Country name</b></td>
+                                        <td><b>Region</b></td>
+                                        <td><b>Region name</b></td>
+                                        <td><b>City</b></td>
+                                        <td><b>Postal code</b></td>
+                                        <td><b>Latitude</b></td>
+                                        <td><b>Longitude</b></td>
+                                    <tr/>
+
+
+                                    <c:forEach items="${positions}" var="position">
+                                        <tr>
+                                            <td>${position.ip}</
+                                            ></td>
+                                            <td>${position.countryCode}</td>
+                                            <td>${position.countryName}</td>
+                                            <td>${position.region}</td>
+                                            <td>${position.regionName}</td>
+                                            <td>${position.city}</td>
+                                            <td>${position.postalCode}</td>
+                                            <td>${position.latitude}</td>
+                                            <td>${position.longitude}</td>
+                                        </tr>
+                                    </c:forEach>
+                                </table>
                             </div>
                         </div>
                     </c:when>
                     <c:otherwise>
                         <div class="form-group">
-                            <div class="col-xs-12">
-                                <h2>${location}</h2>
+                            <div class="col-xs-12" style="font-size: small">
+                                <c:choose>
+                                    <c:when test="${ip!=null}">
+                                        Location not found!
+                                    </c:when>
+                                </c:choose>
                             </div>
                         </div>
                     </c:otherwise>

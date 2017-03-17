@@ -10,16 +10,17 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import static ru.ivan.geoip.util.Constants.GEOIP_DB_FILE;
+
 public class GetLocationExample {
     public static void main(String[] args) throws IOException, GeoIp2Exception {
 
-        final String DATABASE_CITY_PATH = System.getenv("GEOIP_DB_FILE");
 
-        File dbCityFile = new File(DATABASE_CITY_PATH);
+        File dbCityFile = new File(GEOIP_DB_FILE);
         DatabaseReader cityReader = new DatabaseReader.Builder(dbCityFile).build();
 
 
-        InetAddress ipAddress = InetAddress.getByName("25.25.11.42");
+        InetAddress ipAddress = InetAddress.getByName("46.188.121.42");
 
         CityResponse cityResponse = cityReader.city(ipAddress);
 
@@ -39,7 +40,7 @@ public class GetLocationExample {
         Postal postal = cityResponse.getPostal();
         System.out.println(postal.getCode()); // '55455'
 
-        // Geo IPLocation info.
+        // Geo IpPosition info.
         Location location = cityResponse.getLocation();
 
         // Latitude

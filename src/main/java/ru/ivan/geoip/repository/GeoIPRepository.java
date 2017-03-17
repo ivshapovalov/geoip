@@ -1,9 +1,8 @@
 package ru.ivan.geoip.repository;
 
-import ru.ivan.geoip.repository.entity.IPLocation;
+import ru.ivan.geoip.repository.entity.IpPosition;
 
 public interface GeoIPRepository {
-    String getLocationAsJSON(String ip);
 
-    IPLocation getLocation(String ip);
+    IpPosition getPosition(String ip);
 }

@@ -1,11 +1,11 @@
 package ru.ivan.geoip.service;
 
 
-import ru.ivan.geoip.repository.entity.IPLocation;
+import ru.ivan.geoip.repository.entity.IpPosition;
 
 public interface GeoIpService {
 
-    String getLocationAsJSON(String IP);
+    String convertPositionToJSON(IpPosition ipPosition);
 
-    IPLocation getLocation(String IP);
+    IpPosition getPosition(String ip);
 }
